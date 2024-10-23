@@ -1,0 +1,11 @@
+﻿﻿.center-content {
+    text-align: center;
+}
+.row {
+    display: inline-block;
+    text-align: left;
+}
+dd {
+    display: inline;
+    margin-right: 5px; 
+}

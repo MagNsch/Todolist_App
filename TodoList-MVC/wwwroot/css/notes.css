@@ -1,0 +1,89 @@
+﻿body {
+    color: white;
+    background-color: black;
+}
+
+
+
+
+th, td {
+    color: white;
+}
+
+h4 {
+    color: white;
+}
+
+header {
+    background-color: black; 
+}
+
+    
+    header .navbar {
+        background-color: black !important;
+    }
+
+    header .navbar-brand,
+    header .nav-link {
+        color: white !important; 
+    }
+
+
+
+.form-control {
+    background-color: black;
+    color: white;
+}
+
+    .form-control:hover {
+        background-color: black;
+        color: white;
+    }
+
+    .form-control:focus {
+        background-color: black;
+        color: white;
+    }
+
+    .form-control:not(:focus) {
+        background-color: black;
+        color: white;
+    }
+
+
+a {
+    color: white;
+    text-decoration: none;
+}
+
+    a:hover {
+        color: green;
+    }
+
+.new-note-button {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: blue;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    text-decoration: none;
+    font-size: 1.2em;
+    transition: background-color 0.3s ease;
+    text-align: center;
+}
+
+    .new-note-button:hover {
+        background-color: darkblue;
+    }
+
+.center-button {
+    text-align: center;
+    margin-top: 20px;
+}
+
+h1 {
+    text-align: center;
+    color: white;
+    margin-bottom: 20px;
+}

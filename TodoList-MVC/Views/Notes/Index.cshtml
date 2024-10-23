@@ -1,0 +1,38 @@
+﻿@model IEnumerable<Note>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<head>
+    <link rel="stylesheet" href="~/css/card.css" />
+    <link rel="stylesheet" href="~/css/notes.css" />
+</head>
+
+<h1>Notes</h1>
+
+<div class="center-button">
+    <p>
+        <a asp-action="CreateNewNote" class="new-note-button">New note</a>
+    </p>
+</div>
+
+
+<div class="row">
+    @foreach (var item in Model)
+    {
+        <div class="col-md-3 mb-3">
+            <div class="custom-card">
+                <div class="card-body">
+                    <h5 class="card-title">@Html.DisplayFor(modelItem => item.Title)</h5>
+                    <p class="card-text">@Html.DisplayFor(modelItem => item.Description)</p>
+                    <p class="card-text">@Html.DisplayFor(modelItem => item.Date)</p>
+                    <form method="post" action="@Url.Action("DeleteNote", new { BsonString = item.BsonString })">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-danger">Done</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    }
+</div>
