@@ -17,6 +17,7 @@ public class Note
     [RegularExpression(".{1,100}", ErrorMessage = "Description must be between 1 and 100 characters.")]
     public string Description { get; set; }
 
+
     public DateTime Date { get; set; } = DateTime.Now;
 
     public Note(string title, string description)

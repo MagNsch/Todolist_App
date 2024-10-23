@@ -1,4 +1,6 @@
 ﻿using MongoDB.Driver;
+using MongoDB.Driver.Core.Configuration;
+using System.Collections;
 using TodoList_App.DTOs;
 using TodoList_App.Interfaces;
 using TodoList_App.Models;
@@ -7,55 +9,52 @@ namespace TodoList_App.Repositories;
 
 public class NotesRepository : INotesCRUD
 {
-    private static readonly string connectionString = "mongodb://127.0.0.1:27017";
+    public string ConnectionString { get; private set; }
+    public string DatabaseName { get; private set; }
+    public string CollectionName { get; private set; }
 
-    private static readonly string databaseName = "notes_db";
-
-    private static readonly string collectionName = "notes";
+    private readonly IMongoCollection<Note> _notesCollection;
 
 
-    private static IMongoCollection<Note> ConnectionToMongo()
+    public NotesRepository(IConfiguration configuration)
     {
-        var client = new MongoClient(connectionString);
-        var db = client.GetDatabase(databaseName);
+        // Hent MongoDB-indstillinger fra appsettings.json
+        ConnectionString = configuration["MongoDb:ConnectionStrings"];
+        DatabaseName = configuration["MongoDb:DatabaseName"];
+        CollectionName = configuration["MongoDb:CollectionName"];
 
-        return db.GetCollection<Note>(collectionName);
+        // Opret MongoClient og hent den ønskede database og collection
+        var client = new MongoClient(ConnectionString);
+        var database = client.GetDatabase(DatabaseName);
+        _notesCollection = database.GetCollection<Note>(CollectionName);
     }
 
     public async Task<IEnumerable<Note>> GetAllNotesAsync()
     {
-        IMongoCollection<Note> notesCollection = ConnectionToMongo();
-        
-        var results = await notesCollection.FindAsync(all => true);
-
-        return results.ToList();
+        return await _notesCollection.Find(_ => true).ToListAsync();
     }
 
     public async Task<Note> GetByIdAsync(string id)
     {
-        IMongoCollection<Note> notesCollection = ConnectionToMongo();
-        var getNote = await notesCollection.FindAsync(note => id == note.BsonString);
+        var getNote = await _notesCollection.FindAsync(note => id == note.BsonString);
 
         return getNote.FirstOrDefault();
     }
 
     public async Task CreateNoteAsync(CreateNoteDTO noteDTO)
     {
-        IMongoCollection<Note> notesCollection = ConnectionToMongo();
-
         Note note = new(noteDTO.Title, noteDTO.Description);
         
-        await notesCollection.InsertOneAsync(note);
+        await _notesCollection.InsertOneAsync(note);
 
     }
 
     public async Task<bool> DeleteNoteAsync(string bsonString)
     {
-        IMongoCollection<Note> notesCollection = ConnectionToMongo();
-
-        var noteToDelete = await notesCollection.DeleteOneAsync(c => c.BsonString == bsonString);
+        var noteToDelete = await _notesCollection.DeleteOneAsync(c => c.BsonString == bsonString);
 
         if (noteToDelete != null) { return true; }
+        
         else { return false; }
     }
 
