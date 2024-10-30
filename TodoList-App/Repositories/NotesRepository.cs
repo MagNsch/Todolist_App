@@ -1,13 +1,11 @@
 ﻿using MongoDB.Driver;
-using MongoDB.Driver.Core.Configuration;
-using System.Collections;
 using TodoList_App.DTOs;
 using TodoList_App.Interfaces;
 using TodoList_App.Models;
 
 namespace TodoList_App.Repositories;
 
-public class NotesRepository : INotesCRUD
+public class NotesRepository : IGenericCrud<Note, CreateNoteDTO>
 {
     public string ConnectionString { get; private set; }
     public string DatabaseName { get; private set; }
@@ -15,23 +13,22 @@ public class NotesRepository : INotesCRUD
 
     private readonly IMongoCollection<Note> _notesCollection;
 
-
-    public NotesRepository(IConfiguration configuration)
+    public NotesRepository()
     {
-        // Hent MongoDB-indstillinger fra appsettings.json
-        ConnectionString = configuration["MongoDb:ConnectionStrings"];
-        DatabaseName = configuration["MongoDb:DatabaseName"];
-        CollectionName = configuration["MongoDb:CollectionName"];
+        ConnectionString = "mongodb://127.0.0.1:27017";
+        DatabaseName = "notes_db";
+        CollectionName = "notes";
 
-        // Opret MongoClient og hent den ønskede database og collection
         var client = new MongoClient(ConnectionString);
         var database = client.GetDatabase(DatabaseName);
         _notesCollection = database.GetCollection<Note>(CollectionName);
     }
 
-    public async Task<IEnumerable<Note>> GetAllNotesAsync()
+    public async Task<IEnumerable<Note>> GetAllAsync()
     {
-        return await _notesCollection.Find(_ => true).ToListAsync();
+        var notes = await _notesCollection.Find(_ => true).ToListAsync();
+
+        return notes;
     }
 
     public async Task<Note> GetByIdAsync(string id)
@@ -41,21 +38,21 @@ public class NotesRepository : INotesCRUD
         return getNote.FirstOrDefault();
     }
 
-    public async Task CreateNoteAsync(CreateNoteDTO noteDTO)
+    public async Task<Note> CreateAsync(CreateNoteDTO noteDTO)
     {
-        Note note = new(noteDTO.Title, noteDTO.Description);
-        
+        Note note = new(noteDTO.Title, noteDTO.Description, noteDTO.Category, noteDTO.UserId);
+
         await _notesCollection.InsertOneAsync(note);
 
+        return note;
     }
 
-    public async Task<bool> DeleteNoteAsync(string bsonString)
+    public async Task<bool> DeleteAsync(string bsonString)
     {
         var noteToDelete = await _notesCollection.DeleteOneAsync(c => c.BsonString == bsonString);
 
         if (noteToDelete != null) { return true; }
-        
+
         else { return false; }
     }
-
 }

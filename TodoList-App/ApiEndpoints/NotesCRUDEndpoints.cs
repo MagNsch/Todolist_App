@@ -1,26 +1,26 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using TodoList_App.DTOs;
 using TodoList_App.Interfaces;
+using TodoList_App.Models;
 
 namespace TodoList_App.ApiEndpoints;
 
 public static class NotesCRUDEndpoints
 {
+    
     public static void MapNoteRoutes(this IEndpointRouteBuilder app)
     {
-        app.MapGet("/getallnotes", async (INotesCRUD notesRepo, [FromServices] ILogger<Program> logger) =>
+        app.MapGet("/getallnotes", [Authorize] async ([FromServices] IGenericCrud<Note, CreateNoteDTO> notesRepo, [FromServices] ILogger<Program> logger) =>
         {
-
-
-            var notes = await notesRepo.GetAllNotesAsync();
-
+            var notes = await notesRepo.GetAllAsync();
             logger.LogInformation("Successfully retrieved all notes.");
             return Results.Ok(notes);
 
-        });
+        }).CacheOutput();
 
 
-        app.MapGet("/getnote{id}", async (INotesCRUD notesRepo, [FromServices] ILogger<Program> logger, string id) =>
+        app.MapGet("/getnote{id}", [Authorize] async ([FromServices] IGenericCrud<Note, CreateNoteDTO> notesRepo, [FromServices] ILogger<Program> logger, [FromRoute] string id) =>
         {
             var note = await notesRepo.GetByIdAsync(id);
 
@@ -41,22 +41,21 @@ public static class NotesCRUDEndpoints
         });
 
 
-        app.MapPost("/createnote", async([FromServices]ILogger<Program> logger, INotesCRUD notesRepo, [FromBody] CreateNoteDTO noteDTO) =>
+        app.MapPost("/createnote", [Authorize] async ([FromServices] ILogger<Program> logger, [FromServices] IGenericCrud<Note, CreateNoteDTO> notesRepo, [FromBody] CreateNoteDTO noteDTO) =>
         {
             if (noteDTO == null)
             {
                 logger.LogWarning("Note is null");
                 return Results.NotFound("Note data is missing");
             }
-
-            await notesRepo.CreateNoteAsync(noteDTO);
+            await notesRepo.CreateAsync(noteDTO);
 
             logger.LogInformation("Successfully created a new note");
             return Results.Created();
 
         });
 
-        app.MapDelete("deletenote/{noteId}", async (INotesCRUD notesRepo, [FromServices] ILogger<Program> logger, string noteId) =>
+        app.MapDelete("deletenote/{noteId}", [Authorize] async ([FromServices] IGenericCrud<Note, CreateNoteDTO> notesRepo, [FromServices] ILogger<Program> logger, [FromRoute] string noteId) =>
         {
             if (string.IsNullOrEmpty(noteId))
             {
@@ -64,7 +63,7 @@ public static class NotesCRUDEndpoints
                 return Results.BadRequest();
             }
 
-            var result = await notesRepo.DeleteNoteAsync(noteId);
+            var result = await notesRepo.DeleteAsync(noteId);
 
             if (result)
             {

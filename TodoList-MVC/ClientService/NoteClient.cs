@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Http.HttpResults;
-using RestSharp;
-using System.Collections.ObjectModel;
+﻿using RestSharp;
 using System.Net;
 using TodoList_MVC.Models;
 
@@ -39,8 +37,8 @@ namespace TodoList_MVC.ClientService
             var request = new RestRequest($"deletenote/{bsonString}", Method.Delete);
             var response = await client.ExecuteAsync(request);
 
-            if(response != null) { return true; }
-            
+            if (response != null) { return true; }
+
             return false;
         }
 

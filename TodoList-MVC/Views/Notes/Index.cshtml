@@ -27,6 +27,7 @@
                     <h5 class="card-title">@Html.DisplayFor(modelItem => item.Title)</h5>
                     <p class="card-text">@Html.DisplayFor(modelItem => item.Description)</p>
                     <p class="card-text">@Html.DisplayFor(modelItem => item.Date)</p>
+                    <p class="card-text"> @Html.DisplayFor(modelItem => item.Category)</p>
                     <form method="post" action="@Url.Action("DeleteNote", new { BsonString = item.BsonString })">
                         @Html.AntiForgeryToken()
                         <button type="submit" class="btn btn-danger">Done</button>
