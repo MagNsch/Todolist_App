@@ -1,9 +1,9 @@
-﻿namespace TodoList_App.Models;
+﻿namespace TodoList_MVC.Models;
 
 
 public enum Category
 {
-    Work, 
+    Work,
     Hobby,
     Cleaning,
 

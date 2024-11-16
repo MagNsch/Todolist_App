@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using TodoList_App.DTOs;
 using TodoList_App.Interfaces;
 using TodoList_App.Models;
@@ -41,13 +43,15 @@ public static class NotesCRUDEndpoints
         });
 
 
-        app.MapPost("/createnote", [Authorize] async ([FromServices] ILogger<Program> logger, [FromServices] IGenericCrud<Note, CreateNoteDTO> notesRepo, [FromBody] CreateNoteDTO noteDTO) =>
+        app.MapPost("/createnote", [Authorize] async (HttpContext httpContext,[FromServices] ILogger<Program> logger, [FromServices] IGenericCrud<Note, CreateNoteDTO> notesRepo, [FromBody] CreateNoteDTO noteDTO) =>
         {
+            var userId = httpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (noteDTO == null)
             {
                 logger.LogWarning("Note is null");
                 return Results.NotFound("Note data is missing");
             }
+
             await notesRepo.CreateAsync(noteDTO);
 
             logger.LogInformation("Successfully created a new note");

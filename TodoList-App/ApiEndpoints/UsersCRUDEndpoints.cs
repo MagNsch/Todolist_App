@@ -34,7 +34,7 @@ public static class UsersCRUDEndpoints
 
             logger.LogInformation("Successfully retrieved note with id {Id}.", id);
             return Results.Ok(user);
-        });
+        }).RequireAuthorization();
 
 
         app.MapPost("createuser", [Authorize] async ([FromServices] IGenericCrud<User, CreateUserDTO> userRepo, [FromServices] ILogger<Program> logger, [FromBody] CreateUserDTO userDTO) =>
@@ -55,7 +55,7 @@ public static class UsersCRUDEndpoints
             var users = await userRepo.GetAllAsync();
             logger.LogInformation("Getting all users");
             return users;
-        });
+        }).RequireAuthorization();
 
 
         app.MapPost("/auth/login", async ([FromServices] IAuthenticationServiceInterface auth, [FromServices] ILogger<Program> logger, [FromBody] LoginModel loginModel) =>

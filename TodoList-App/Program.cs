@@ -1,15 +1,14 @@
-using TodoList_App.ApiEndpoints;
-using TodoList_App.Interfaces;
-using TodoList_App.Repositories;
-using Serilog;
-using TodoList_App.Models;
-using TodoList_App.DTOs;
-using Microsoft.OpenApi.Models;
-using Swashbuckle.AspNetCore.Filters;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
+using Serilog;
+using Swashbuckle.AspNetCore.Filters;
 using System.Text;
-using MongoDB.Driver;
+using TodoList_App.ApiEndpoints;
+using TodoList_App.DTOs;
+using TodoList_App.Interfaces;
+using TodoList_App.Models;
+using TodoList_App.Repositories;
 
 internal class Program
 {
@@ -27,7 +26,6 @@ internal class Program
         //Must write bearer and then keyvalue "Bearer keyvalue"
         builder.Services.AddSwaggerGen(options =>
         {
-
             options.AddSecurityDefinition("oauth2", new OpenApiSecurityScheme
             {
                 In = ParameterLocation.Header,
@@ -51,9 +49,9 @@ internal class Program
             ValidateAudience = true,
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
-            ValidIssuer = "yourIssuer", // Erstat med din issuer
-            ValidAudience = "yourAudience", // Erstat med din audience
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("Mysecretkeyisnoteasytoguessnonoo")) // Erstat med din hemmelige nøgle
+            ValidIssuer = "yourIssuer", 
+            ValidAudience = "yourAudience", 
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("Mysecretkeyisnoteasytoguessnonoo")) 
         };
     });
 
@@ -75,7 +73,7 @@ internal class Program
         }
 
         app.UseAuthentication();
-app.UseAuthorization();
+        app.UseAuthorization();
         app.UseSerilogRequestLogging();
 
         app.UseHttpsRedirection();

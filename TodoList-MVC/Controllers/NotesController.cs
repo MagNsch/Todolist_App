@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using TodoList_MVC.ClientService;
+using System.Security.Claims;
+using TodoList_MVC.ClientService.Interface;
 using TodoList_MVC.Models;
 
 namespace TodoList_MVC.Controllers;
@@ -17,7 +18,16 @@ public class NotesController : Controller
     [HttpGet]
     public async Task<IActionResult> Index()
     {
-        var notes = await _client.GetAllNotesAsync();
+        string token = GetSessionToken();
+        bool isLoggedIn = !string.IsNullOrEmpty(token);
+        ViewData["IsLoggedIn"] = isLoggedIn;
+
+        if (!isLoggedIn)
+        {
+            return RedirectToAction("Login", "Auth");
+        }
+
+        var notes = await _client.GetAllNotesAsync(token);
         return View(notes);
     }
 
@@ -32,7 +42,10 @@ public class NotesController : Controller
     {
         try
         {
-            await _client.CreateNoteAsync(note);
+
+            string token = GetSessionToken();
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            await _client.CreateNoteAsync(note, token);
             return RedirectToAction(nameof(Index));
         }
         catch (Exception)
@@ -49,13 +62,20 @@ public class NotesController : Controller
         return View(nameof(Index));
     }
 
+    public string GetSessionToken()
+    {
+        return HttpContext.Session.GetString("AuthToken");
+    }
+
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteNote(string bsonString, IFormCollection collection)
     {
         try
         {
-            await _client.DeleteNoteAsync(bsonString);
+            string token = GetSessionToken();
+            
+            await _client.DeleteNoteAsync(bsonString, token);
 
             return RedirectToAction(nameof(Index));
         }

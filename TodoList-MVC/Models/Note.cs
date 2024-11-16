@@ -2,7 +2,6 @@
 using MongoDB.Bson.Serialization.Attributes;
 using System;
 using System.ComponentModel.DataAnnotations;
-using TodoList_App.Models;
 
 namespace TodoList_MVC.Models;
 
@@ -25,6 +24,9 @@ public record Note
 
     [BsonRepresentation(BsonType.String)]
     public Category Category { get; set; }
+
+    [BsonRepresentation(BsonType.String)]
+    public string UserId { get; set; }
 
     public Note() { }
 }
