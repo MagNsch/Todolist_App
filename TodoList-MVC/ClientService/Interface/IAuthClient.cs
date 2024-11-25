@@ -5,4 +5,6 @@ namespace TodoList_MVC.ClientService.Interface;
 public interface IAuthClient
 {
     Task<string> LoginAsync(LoginModel loginModel);
+
+    Task<string> CreateUser();
 }

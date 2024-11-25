@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages;
 using TodoList_MVC.ClientService.Interface;
 using TodoList_MVC.Models;
 
@@ -18,20 +17,34 @@ public class AuthController : Controller
     [HttpGet]
     public IActionResult Login()
     {
-        return View(); 
+        return View();
     }
 
     [HttpPost]
-    public async Task<IActionResult> Login(LoginModel loginModel)
+    public IActionResult Logout()
+    {
+        HttpContext.Session.Remove("AuthToken");
+        return RedirectToAction("Login", "Auth");
+    }
+
+    [HttpGet]
+    public IActionResult Register()
+    {
+        return View();
+    }
+
+
+    [HttpPost]
+    public async Task<IActionResult> Login(LoginModel model)
     {
         if (!ModelState.IsValid)
         {
-            return View(loginModel); 
+            return View(model);
         }
 
         try
         {
-            string token = await _authService.LoginAsync(loginModel);
+            string token = await _authService.LoginAsync(model);
 
 
             if (!string.IsNullOrEmpty(token))
@@ -46,11 +59,7 @@ public class AuthController : Controller
 
             ModelState.AddModelError("", "Login dit not succed: " + ex.Message);
         }
-        return View(loginModel);
+        return View(model);
     }
-    public IActionResult Logout()
-    {
-        HttpContext.Session.Remove("AuthToken");
-        return RedirectToAction("Login", "Account");
-    }
+   
 }

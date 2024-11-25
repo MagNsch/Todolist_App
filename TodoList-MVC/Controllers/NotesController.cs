@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using TodoList_MVC.ClientService.Interface;
 using TodoList_MVC.Models;
@@ -42,7 +43,6 @@ public class NotesController : Controller
     {
         try
         {
-
             string token = GetSessionToken();
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             await _client.CreateNoteAsync(note, token);
@@ -54,7 +54,6 @@ public class NotesController : Controller
             return View(nameof(Index));
         }
     }
-
 
     [HttpGet]
     public IActionResult DeleteNote()
