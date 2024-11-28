@@ -39,7 +39,7 @@ public class NotesController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> CreateNewNoteAsync(IFormCollection collection, Note note)
+    public async Task<IActionResult> CreateNewNoteAsync(Note note)
     {
         try
         {

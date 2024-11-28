@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
-using MongoDB.Bson;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -16,8 +15,7 @@ public static class UsersCRUDEndpoints
 {
     public static void MapNoteRoutes(this IEndpointRouteBuilder app)
     {
-
-        app.MapGet("getuserbyid/{id}", [Authorize] async ([FromServices] IGenericCrud<User, CreateUserDTO> userRepo, [FromServices] ILogger<Program> logger, [FromRoute] string id) =>
+        app.MapGet("getuserbyid/{id}", [Authorize] async ([FromServices] IAuthenticationServiceInterface userRepo, [FromServices] ILogger<Program> logger, [FromRoute] string id) =>
         {
             User user = await userRepo.GetByIdAsync(id);
 
@@ -37,26 +35,33 @@ public static class UsersCRUDEndpoints
         }).RequireAuthorization();
 
 
-        app.MapPost("createuser", [Authorize] async ([FromServices] IGenericCrud<User, CreateUserDTO> userRepo, [FromServices] ILogger<Program> logger, [FromBody] CreateUserDTO userDTO) =>
+        app.MapPost("auth/create", async ([FromServices] IAuthenticationServiceInterface userRepo, [FromServices] ILogger<Program> logger, [FromBody] CreateUserDTO userDTO) =>
         {
             if (userDTO == null)
             {
                 logger.LogWarning("Note is null");
                 return Results.NotFound("Note data is missing");
             }
-            await userRepo.CreateAsync(userDTO);
 
-            logger.LogInformation("Successfully created a new note");
-            return Results.Created();
+            var existingUser = await userRepo.GetUserByEmail(userDTO.Email);
+            if (existingUser != null)
+            {
+                logger.LogWarning("User with this email already exists: {Email}", userDTO.Email);
+                return Results.BadRequest("User with this email already exists.");
+            }
+
+            try
+            {
+                var newUser = await userRepo.CreateAsync(userDTO);
+                logger.LogInformation("Successfully created a new note");
+                return Results.Created($"/users/{newUser.UserId}", newUser);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error occurred while creating user.");
+                return Results.Problem("An error occurred while creating the user.");
+            }
         });
-
-        app.MapGet("getallusers", [Authorize] async ([FromServices] IGenericCrud<User, CreateUserDTO> userRepo, [FromServices] ILogger<Program> logger) =>
-        {
-            var users = await userRepo.GetAllAsync();
-            logger.LogInformation("Getting all users");
-            return users;
-        }).RequireAuthorization();
-
 
         app.MapPost("/auth/login", async ([FromServices] IAuthenticationServiceInterface auth, [FromServices] ILogger<Program> logger, [FromBody] LoginModel loginModel) =>
         {
@@ -89,5 +94,4 @@ public static class UsersCRUDEndpoints
             });
         });
     }
-
 }

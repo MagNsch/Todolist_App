@@ -16,6 +16,19 @@ public class AuthClient : IAuthClient
         _client = new RestClient(url);
     }
 
+    public async Task<CreateUserDTO> CreateUser(CreateUserDTO createUserModel)
+    {
+        var request = new RestRequest("auth/create", Method.Post).AddJsonBody(createUserModel);
+        var response = await _client.ExecuteAsync<CreateUserDTO>(request);
+
+        if (!response.IsSuccessful)
+        {
+            throw new Exception($"API call failed: {response.StatusCode} - {response.Content}");
+        }
+
+        return response.Data;
+    }
+
     public async Task<string> LoginAsync(LoginModel loginModel)
     {
         var request = new RestRequest("/auth/login", Method.Post).AddJsonBody(loginModel);

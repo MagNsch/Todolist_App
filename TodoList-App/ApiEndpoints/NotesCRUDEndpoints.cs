@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Net.Http;
+using System.Runtime.InteropServices;
 using System.Security.Claims;
 using TodoList_App.DTOs;
 using TodoList_App.Interfaces;
@@ -10,12 +12,14 @@ namespace TodoList_App.ApiEndpoints;
 
 public static class NotesCRUDEndpoints
 {
-    
+
     public static void MapNoteRoutes(this IEndpointRouteBuilder app)
     {
-        app.MapGet("/getallnotes", [Authorize] async ([FromServices] IGenericCrud<Note, CreateNoteDTO> notesRepo, [FromServices] ILogger<Program> logger) =>
+        app.MapGet("/getallnotes", [Authorize] async (HttpContext httpContext, [FromServices] IGenericCrud<Note, CreateNoteDTO> notesRepo, [FromServices] ILogger<Program> logger) =>
         {
-            var notes = await notesRepo.GetAllAsync();
+            var userId = httpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            var notes = await notesRepo.GetAllAsync(userId);
             logger.LogInformation("Successfully retrieved all notes.");
             return Results.Ok(notes);
 
@@ -43,16 +47,19 @@ public static class NotesCRUDEndpoints
         });
 
 
-        app.MapPost("/createnote", [Authorize] async (HttpContext httpContext,[FromServices] ILogger<Program> logger, [FromServices] IGenericCrud<Note, CreateNoteDTO> notesRepo, [FromBody] CreateNoteDTO noteDTO) =>
+        app.MapPost("/createnote", [Authorize] async (HttpContext httpContext, [FromServices] ILogger<Program> logger, [FromServices] IGenericCrud<Note, CreateNoteDTO> notesRepo, [FromBody] CreateNoteDTO noteDTO) =>
         {
             var userId = httpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
+
             if (noteDTO == null)
             {
                 logger.LogWarning("Note is null");
                 return Results.NotFound("Note data is missing");
             }
 
-            await notesRepo.CreateAsync(noteDTO);
+            var updatedNoteDTO = noteDTO with { UserId = userId };
+
+            await notesRepo.CreateAsync(updatedNoteDTO);
 
             logger.LogInformation("Successfully created a new note");
             return Results.Created();

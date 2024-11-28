@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using TodoList_MVC.ClientService.Interface;
 using TodoList_MVC.Models;
 
@@ -19,6 +20,43 @@ public class AuthController : Controller
     {
         return View();
     }
+
+    [HttpGet]
+    public IActionResult CreateUser()
+    {
+        return View();
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> CreateUser(CreateUserDTO userModel)
+    {
+        try
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(userModel);
+            }
+
+            var user = await _authService.CreateUser(userModel);
+
+            if (user != null)
+            {
+                TempData["SuccessMessage"] = "User registered successfully!";
+                return RedirectToAction("Login", "Auth");  
+            }
+
+            TempData["ErrorMessage"] = "User creation failed.";
+            return View(userModel);
+        }
+        catch (Exception)
+        {
+            TempData["ErrorMessage"] = "An error occurred while creating the user.";
+            return View(userModel);  
+        }
+    }
+
+
 
     [HttpPost]
     public IActionResult Logout()

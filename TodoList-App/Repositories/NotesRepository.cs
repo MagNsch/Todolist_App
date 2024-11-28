@@ -24,9 +24,11 @@ public class NotesRepository : IGenericCrud<Note, CreateNoteDTO>
         _notesCollection = database.GetCollection<Note>(CollectionName);
     }
 
-    public async Task<IEnumerable<Note>> GetAllAsync()
+    public async Task<IEnumerable<Note>> GetAllAsync(string userId)
     {
-        var notes = await _notesCollection.Find(_ => true).ToListAsync();
+        var filter = Builders<Note>.Filter.Eq(note => note.UserId, userId);
+
+        var notes = await _notesCollection.Find(filter).ToListAsync();
 
         return notes;
     }
