@@ -18,7 +18,6 @@ internal class Program
 
 
         builder.Services.AddScoped<IGenericCrud<Note, CreateNoteDTO>, NotesRepository>();
-        builder.Services.AddScoped<IGenericCrud<User, CreateUserDTO>, UsersRepository>();
         builder.Services.AddScoped<IAuthenticationServiceInterface, AuthenticationRepository>();
 
         builder.Services.AddEndpointsApiExplorer();

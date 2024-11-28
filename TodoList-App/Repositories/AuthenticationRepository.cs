@@ -1,4 +1,6 @@
 ﻿using MongoDB.Driver;
+using TodoList_App.DTOs;
+using TodoList_App.HelperMethods;
 using TodoList_App.Interfaces;
 using TodoList_App.Models;
 
@@ -26,12 +28,33 @@ public class AuthenticationRepository : IAuthenticationServiceInterface
     {
         var user = await _usersCollection.Find(u => u.Email == email).FirstOrDefaultAsync();
 
-        if (user != null)
-        {
-            return user;
-        }
-        return null;
+        return user;
     }
 
+    public async Task<bool> DeleteAsync(string bsonString)
+    {
+        var noteToDelete = await _usersCollection.DeleteOneAsync(c => c.UserId == bsonString);
 
+        if (noteToDelete != null) { return true; }
+
+        else { return false; }
+;
+    }
+
+    public async Task<User> CreateAsync(CreateUserDTO dto)
+    {
+        User user = new() { Email = dto.Email, PasswordHash = BCryptHashing.HashPassword(dto.PasswordHash) };
+
+        await _usersCollection.InsertOneAsync(user);
+
+        return user;
+    }
+
+    public async Task<User> GetByIdAsync(string id)
+    {
+        var user = await _usersCollection.FindAsync(user => user.UserId == id);
+
+        return user.FirstOrDefault();
+
+    }
 }
