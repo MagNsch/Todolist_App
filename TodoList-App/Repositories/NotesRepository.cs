@@ -1,4 +1,5 @@
 ﻿using MongoDB.Driver;
+using TodoList_App.Database;
 using TodoList_App.DTOs;
 using TodoList_App.Interfaces;
 using TodoList_App.Models;
@@ -7,21 +8,12 @@ namespace TodoList_App.Repositories;
 
 public class NotesRepository : IGenericCrud<Note, CreateNoteDTO>
 {
-    public string ConnectionString { get; private set; }
-    public string DatabaseName { get; private set; }
-    public string CollectionName { get; private set; }
-
-    private readonly IMongoCollection<Note> _notesCollection;
+    MongoDBConfig config = new MongoDBConfig();
+    IMongoCollection<Note> _notesCollection;
 
     public NotesRepository()
     {
-        ConnectionString = "mongodb://127.0.0.1:27017";
-        DatabaseName = "notes_db";
-        CollectionName = "notes";
-
-        var client = new MongoClient(ConnectionString);
-        var database = client.GetDatabase(DatabaseName);
-        _notesCollection = database.GetCollection<Note>(CollectionName);
+        _notesCollection = config.GetNotesCollection();
     }
 
     public async Task<IEnumerable<Note>> GetAllAsync(string userId)

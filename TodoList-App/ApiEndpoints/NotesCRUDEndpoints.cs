@@ -1,8 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System.Net.Http;
-using System.Runtime.InteropServices;
 using System.Security.Claims;
 using TodoList_App.DTOs;
 using TodoList_App.Interfaces;
