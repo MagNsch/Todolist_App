@@ -12,10 +12,10 @@ public class MongoDBConfig
         var client = new MongoClient("mongodb://localhost:27017");
 
         string production_db = "notes_db";
-        string test_db = "test";
+        string test_db = "test_db-notesproject";
 
 
-        _database = client.GetDatabase("test_db-notesproject");
+        _database = client.GetDatabase(test_db);
        
     }
 

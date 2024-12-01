@@ -92,6 +92,6 @@ public static class UsersCRUDEndpoints
             {
                 token = new JwtSecurityTokenHandler().WriteToken(token)
             });
-        });
+        }).WithRequestTimeout(TimeSpan.FromSeconds(45));
     }
 }

@@ -13,7 +13,7 @@ public class GetUserByEmail
     {
         //Arrange
         IAuthenticationServiceInterface repo = new AuthenticationRepository();
-        string userEmail = "brian@mail.com";
+        string userEmail = "123han@mail.com";
         //Act
         User user = await repo.GetUserByEmail(userEmail);
         //Assert

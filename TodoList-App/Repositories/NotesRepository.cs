@@ -1,8 +1,11 @@
 ﻿using MongoDB.Driver;
+using System.ComponentModel.DataAnnotations;
 using TodoList_App.Database;
 using TodoList_App.DTOs;
+using TodoList_App.Exceptions;
 using TodoList_App.Interfaces;
 using TodoList_App.Models;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace TodoList_App.Repositories;
 
@@ -34,11 +37,34 @@ public class NotesRepository : IGenericCrud<Note, CreateNoteDTO>
 
     public async Task<Note> CreateAsync(CreateNoteDTO noteDTO)
     {
-        Note note = new(noteDTO.Title, noteDTO.Description, noteDTO.Category, noteDTO.UserId);
 
-        await _notesCollection.InsertOneAsync(note);
+        if (noteDTO == null)
+        {
+            throw new ValidationException("NoteDTO data cannot be null");
+        }
 
-        return note;
+        if (string.IsNullOrWhiteSpace(noteDTO.Title))
+        {
+            throw new CustomValidationException("Note title is required.", "Title", noteDTO.Title);
+        }
+        
+        try
+        {
+            Note note = new(noteDTO.Title, noteDTO.Description, noteDTO.Category, noteDTO.UserId);
+
+            await _notesCollection.InsertOneAsync(note);
+
+            return note;
+
+        }
+        catch (MongoException ex)
+        {
+            throw new ApplicationException("Failed to save the note to the database.", ex);
+        }
+        catch (Exception ex)
+        {
+            throw new ApplicationException("An unexpected error occurred while creating the note.", ex);
+        }
     }
 
     public async Task<bool> DeleteAsync(string bsonString)

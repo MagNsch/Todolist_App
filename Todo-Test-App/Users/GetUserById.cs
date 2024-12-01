@@ -12,7 +12,7 @@ public class GetUserById
     {
         IAuthenticationServiceInterface repo = new AuthenticationRepository();
 
-        string userId = "674b15260e4020d32f9a3c7e";
+        string userId = "674ca6a7d43a26d521921078";
 
 
         User user = await repo.GetByIdAsync(userId);
