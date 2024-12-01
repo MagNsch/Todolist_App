@@ -1,7 +1,8 @@
 
 using TodoList_MVC.ClientService.Interface;
 using TodoList_MVC.ClientService.Service;
-using FluentValidation;
+
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDistributedMemoryCache();

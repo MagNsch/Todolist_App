@@ -1,8 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System.Net.Http;
-using System.Runtime.InteropServices;
 using System.Security.Claims;
 using TodoList_App.DTOs;
 using TodoList_App.Interfaces;
@@ -19,11 +16,16 @@ public static class NotesCRUDEndpoints
         {
             var userId = httpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
 
+            if(string.IsNullOrEmpty(userId))
+            {
+                return Results.BadRequest("User ID not found in claims.");
+            }
+
             var notes = await notesRepo.GetAllAsync(userId);
             logger.LogInformation("Successfully retrieved all notes.");
             return Results.Ok(notes);
 
-        }).CacheOutput();
+        }).CacheOutput().RequireAuthorization().WithRequestTimeout(TimeSpan.FromSeconds(60));
 
 
         app.MapGet("/getnote{id}", [Authorize] async ([FromServices] IGenericCrud<Note, CreateNoteDTO> notesRepo, [FromServices] ILogger<Program> logger, [FromRoute] string id) =>
@@ -44,12 +46,17 @@ public static class NotesCRUDEndpoints
 
             logger.LogInformation("Successfully retrieved note with id {Id}.", id);
             return Results.Ok(note);
-        });
+        }).WithRequestTimeout(TimeSpan.FromSeconds(30));
 
 
         app.MapPost("/createnote", [Authorize] async (HttpContext httpContext, [FromServices] ILogger<Program> logger, [FromServices] IGenericCrud<Note, CreateNoteDTO> notesRepo, [FromBody] CreateNoteDTO noteDTO) =>
         {
             var userId = httpContext.User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Results.BadRequest("User ID not found in claims.");
+            }
 
             if (noteDTO == null)
             {
@@ -64,7 +71,7 @@ public static class NotesCRUDEndpoints
             logger.LogInformation("Successfully created a new note");
             return Results.Created();
 
-        });
+        }).WithRequestTimeout(TimeSpan.FromSeconds(45));
 
         app.MapDelete("deletenote/{noteId}", [Authorize] async ([FromServices] IGenericCrud<Note, CreateNoteDTO> notesRepo, [FromServices] ILogger<Program> logger, [FromRoute] string noteId) =>
         {
@@ -83,6 +90,6 @@ public static class NotesCRUDEndpoints
             }
 
             return Results.NotFound();
-        });
+        }).WithRequestTimeout(TimeSpan.FromSeconds(45));
     }
 }

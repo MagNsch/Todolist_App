@@ -1,4 +1,5 @@
 ﻿using MongoDB.Driver;
+using TodoList_App.Database;
 using TodoList_App.DTOs;
 using TodoList_App.HelperMethods;
 using TodoList_App.Interfaces;
@@ -8,20 +9,11 @@ namespace TodoList_App.Repositories;
 
 public class AuthenticationRepository : IAuthenticationServiceInterface
 {
-    public string ConnectionString { get; private set; }
-    public string DatabaseName { get; private set; }
-    public string CollectionName { get; private set; }
-
-    private readonly IMongoCollection<User> _usersCollection;
+    MongoDBConfig config = new MongoDBConfig();
+    IMongoCollection<User> _usersCollection;
     public AuthenticationRepository()
     {
-        ConnectionString = "mongodb://127.0.0.1:27017";
-        DatabaseName = "notes_db";
-        CollectionName = "users";
-
-        var client = new MongoClient(ConnectionString);
-        var database = client.GetDatabase(DatabaseName);
-        _usersCollection = database.GetCollection<User>(CollectionName);
+        _usersCollection = config.GetUsersCollection();
     }
 
     public async Task<User> GetUserByEmail(string email)
