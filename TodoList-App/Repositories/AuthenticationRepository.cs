@@ -9,11 +9,17 @@ namespace TodoList_App.Repositories;
 
 public class AuthenticationRepository : IAuthenticationServiceInterface
 {
-    MongoDBConfig config = new MongoDBConfig();
-    IMongoCollection<User> _usersCollection;
-    public AuthenticationRepository()
+    private readonly IMongoCollection<User> _usersCollection;
+    public AuthenticationRepository(IConfiguration configuration)
     {
-        _usersCollection = config.GetUsersCollection();
+        var mongoConnectionString = configuration.GetConnectionString("MongoDB");
+        var databaseName = "notes_db";  
+
+        // Opret MongoClient og MongoDatabase
+        var client = new MongoClient(mongoConnectionString);
+        var database = client.GetDatabase(databaseName);
+
+        _usersCollection = database.GetCollection<User>("Users");  // Angiv din collection (f.eks. Users)
     }
 
     public async Task<User> GetUserByEmail(string email)

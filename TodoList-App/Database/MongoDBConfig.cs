@@ -7,9 +7,9 @@ public class MongoDBConfig
 {
     private readonly IMongoDatabase _database;
 
-    public MongoDBConfig()
+    public MongoDBConfig(IConfiguration configuration)
     {
-        var client = new MongoClient("mongodb://localhost:27017");
+        var client = new MongoClient(configuration.GetConnectionString("MongoDB"));
 
         string production_db = "notes_db";
         string test_db = "test_db-notesproject";

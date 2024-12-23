@@ -11,12 +11,17 @@ namespace TodoList_App.Repositories;
 
 public class NotesRepository : IGenericCrud<Note, CreateNoteDTO>
 {
-    MongoDBConfig config = new MongoDBConfig();
-    IMongoCollection<Note> _notesCollection;
-
-    public NotesRepository()
+    private readonly IMongoCollection<Note> _notesCollection;
+    public NotesRepository(IConfiguration configuration)
     {
-        _notesCollection = config.GetNotesCollection();
+        var mongoConnectionString = configuration.GetConnectionString("MongoDB");
+        var databaseName = "notes_db";
+
+
+        var client = new MongoClient(mongoConnectionString);
+        var database = client.GetDatabase(databaseName);
+
+        _notesCollection = database.GetCollection<Note>("Notes");
     }
 
     public async Task<IEnumerable<Note>> GetAllAsync(string userId)
@@ -47,7 +52,7 @@ public class NotesRepository : IGenericCrud<Note, CreateNoteDTO>
         {
             throw new CustomValidationException("Note title is required.", "Title", noteDTO.Title);
         }
-        
+
         try
         {
             Note note = new(noteDTO.Title, noteDTO.Description, noteDTO.Category, noteDTO.UserId);
